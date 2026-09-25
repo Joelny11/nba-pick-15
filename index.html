@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NBA Pick 15</title>
+<style>
+:root{--navy:#071a33;--blue:#174ea6;--orange:#f58426;--bg:#f4f6fa;--white:#fff;--muted:#687386;--green:#16834b}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#172033}
+header{background:linear-gradient(135deg,var(--navy),#123e78);color:white;padding:18px 20px;position:sticky;top:0;z-index:10}
+.header{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.logo{font-weight:900;font-size:22px}.logo span{color:#ff9a3d}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}
+.primary{background:var(--orange);color:white}.secondary{background:#e9eef7;color:var(--navy)}
+main{max-width:1100px;margin:24px auto;padding:0 16px}.screen{display:none}.screen.active{display:block}
+.card{background:white;border-radius:16px;padding:20px;box-shadow:0 5px 22px #0b1b3312;margin-bottom:18px}
+h1{font-size:34px;margin:8px 0}h2{margin:0 0 12px}.sub{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+input,select{width:100%;padding:12px;border:1px solid #d7dce5;border-radius:10px;margin:6px 0 12px;font-size:15px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.pill{display:inline-block;background:#edf3ff;color:var(--blue);padding:6px 10px;border-radius:99px;font-size:13px;font-weight:700}
+.teamgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.team{border:2px solid #e2e6ee;background:white;border-radius:13px;padding:12px;text-align:left;display:flex;align-items:center;gap:10px;min-height:74px}
+.team.selected{border-color:var(--orange);background:#fff6ed}.team .abbr{font-weight:900;color:var(--blue);width:34px}.team small{display:block;color:var(--muted)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f5}th{font-size:13px;color:var(--muted)}
+.rank1{font-weight:900}.right{text-align:right}.notice{padding:12px;border-radius:10px;background:#fff8e9;margin:10px 0}.ok{background:#eaf8f0;color:#12633b}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.nav button.active{background:var(--navy);color:#fff}
+footer{text-align:center;color:var(--muted);padding:30px}
+@media(max-width:600px){h1{font-size:27px}.teamgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="header"><div class="logo">🏀 NBA <span>PICK 15</span></div><div id="userBadge"></div></div></header>
+<main>
+<section id="welcome" class="screen active">
+<div class="card">
+<h1>Tu temporada. Tus 15 equipos.</h1>
+<p class="sub">Compite con tus amigos durante toda la temporada NBA. Cada victoria de tus equipos suma 1 punto.</p>
+<div class="grid">
+<div><label>Tu nombre</label><input id="nameInput" placeholder="Ej. Joelny"></div>
+<div><label>Código de sala</label><input id="roomInput" placeholder="Ej. NBA2026"></div>
+</div>
+<div class="actions"><button class="primary" onclick="enterRoom()">Entrar / Crear sala</button></div>
+<p class="sub" style="margin-top:12px">Esta versión funciona directamente en tu navegador y guarda tus datos en este dispositivo.</p>
+</div>
+</section>
+
+<section id="app" class="screen">
+<div class="nav">
+<button onclick="showTab('dashboard')" id="n-dashboard">🏆 Ranking</button>
+<button onclick="showTab('teams')" id="n-teams">🏀 Mis equipos</button>
+<button onclick="showTab('rules')" id="n-rules">📋 Reglas</button>
+<button class="secondary" onclick="logout()">Salir</button>
+</div>
+
+<div id="dashboard" class="tab">
+<div class="card">
+<h2 id="roomTitle">Sala</h2><span class="pill" id="roomCode"></span>
+<p class="sub">Puntuación: 1 punto por cada victoria de los equipos seleccionados.</p>
+</div>
+<div class="card"><h2>🏆 Ranking de participantes</h2><div id="ranking"></div></div>
+<div class="card"><h2>📈 Mi puntuación</h2><div id="myScore"></div></div>
+</div>
+
+<div id="teams" class="tab" style="display:none">
+<div class="card">
+<h2>Selecciona tus 15 equipos</h2>
+<p class="sub">Seleccionados: <b id="count">0</b> / 15</p>
+<div class="teamgrid" id="teamGrid"></div>
+<div class="actions" style="margin-top:16px"><button class="primary" onclick="saveTeams()">Guardar selección</button></div>
+<div id="teamMsg"></div>
+</div>
+</div>
+
+<div id="rules" class="tab" style="display:none">
+<div class="card"><h2>📋 Reglas</h2>
+<ul><li>Cada participante escoge exactamente 15 de los 30 equipos.</li><li>Cada victoria de un equipo seleccionado vale 1 punto.</li><li>El total del participante es la suma de las victorias de sus 15 equipos.</li><li>El ranking se ordena por puntos acumulados.</li><li>En esta versión de prueba puedes introducir victorias manualmente desde el panel de administrador local.</li></ul>
+</div>
+<div class="card"><h2>⚙️ Simulador de resultados</h2><p class="sub">Úsalo para probar cómo cambia el ranking antes de conectar una fuente NBA en vivo.</p><div id="adminTeams"></div></div>
+</div>
+</section>
+</main><footer>NBA Pick 15 · Prototipo funcional</footer>
+
+<script>
+const TEAMS=[
+["ATL","Atlanta Hawks"],["BOS","Boston Celtics"],["BKN","Brooklyn Nets"],["CHA","Charlotte Hornets"],["CHI","Chicago Bulls"],["CLE","Cleveland Cavaliers"],["DAL","Dallas Mavericks"],["DEN","Denver Nuggets"],["DET","Detroit Pistons"],["GSW","Golden State Warriors"],["HOU","Houston Rockets"],["IND","Indiana Pacers"],["LAC","LA Clippers"],["LAL","Los Angeles Lakers"],["MEM","Memphis Grizzlies"],["MIA","Miami Heat"],["MIL","Milwaukee Bucks"],["MIN","Minnesota Timberwolves"],["NOP","New Orleans Pelicans"],["NYK","New York Knicks"],["OKC","Oklahoma City Thunder"],["ORL","Orlando Magic"],["PHI","Philadelphia 76ers"],["PHX","Phoenix Suns"],["POR","Portland Trail Blazers"],["SAC","Sacramento Kings"],["SAS","San Antonio Spurs"],["TOR","Toronto Raptors"],["UTA","Utah Jazz"],["WAS","Washington Wizards"]
+];
+let state=JSON.parse(localStorage.getItem("nbaPick15")||"null")||{rooms:{},user:null,room:null};
+let room, user;
+function save(){localStorage.setItem("nbaPick15",JSON.stringify(state))}
+function enterRoom(){
+ const name=document.getElementById("nameInput").value.trim();
+ const code=(document.getElementById("roomInput").value.trim()||"NBA2026").toUpperCase();
+ if(!name){alert("Escribe tu nombre.");return}
+ if(!state.rooms[code]) state.rooms[code]={name:"NBA Pick 15 - Amigos",players:{},wins:Object.fromEntries(TEAMS.map(t=>[t[0],0]))};
+ if(!state.rooms[code].players[name]) state.rooms[code].players[name]={teams:[]};
+ state.user=name;state.room=code;save();loadApp();
+}
+function loadApp(){user=state.user;room=state.rooms[state.room];document.getElementById("welcome").classList.remove("active");document.getElementById("app").classList.add("active");document.getElementById("userBadge").textContent="👤 "+user;document.getElementById("roomTitle").textContent=room.name;document.getElementById("roomCode").textContent="Código: "+state.room;renderTeams();renderAll();showTab("dashboard")}
+function renderTeams(){let selected=room.players[user].teams;document.getElementById("count").textContent=selected.length;document.getElementById("teamGrid").innerHTML=TEAMS.map(t=>`<button class="team ${selected.includes(t[0])?'selected':''}" onclick="toggleTeam('${t[0]}')"><span class="abbr">${t[0]}</span><span>${t[1]}<small>${room.wins[t[0]]||0} victorias</small></span></button>`).join("")}
+function toggleTeam(id){let a=room.players[user].teams,i=a.indexOf(id);if(i>=0)a.splice(i,1);else{if(a.length>=15){alert("Ya tienes 15 equipos.");return}a.push(id)}save();renderTeams()}
+function saveTeams(){if(room.players[user].teams.length!==15){document.getElementById("teamMsg").innerHTML='<div class="notice">Debes seleccionar exactamente 15 equipos.</div>';return}save();document.getElementById("teamMsg").innerHTML='<div class="notice ok">✓ Selección guardada correctamente.</div>';renderAll()}
+function score(p){return p.teams.reduce((s,t)=>s+(room.wins[t]||0),0)}
+function renderAll(){
+ let players=Object.entries(room.players).map(([n,p])=>({n,p,s:score(p)})).sort((a,b)=>b.s-a.s);
+ document.getElementById("ranking").innerHTML=`<table><tr><th>#</th><th>Participante</th><th>Equipos</th><th class="right">Puntos</th></tr>${players.map((x,i)=>`<tr class="${x.n===user?'rank1':''}"><td>${i+1}</td><td>${i==0?'🥇 ':i==1?'🥈 ':i==2?'🥉 ':''}${x.n}${x.n===user?' (Tú)':''}</td><td>${x.p.teams.length}/15</td><td class="right">${x.s}</td></tr>`).join("")}</table>`;
+ let me=room.players[user];document.getElementById("myScore").innerHTML=`<h1>${score(me)} pts</h1><p class="sub">${me.teams.length}/15 equipos seleccionados</p>`;
+ renderAdmin();
+}
+function renderAdmin(){
+document.getElementById("adminTeams").innerHTML=TEAMS.map(t=>`<div style="display:grid;grid-template-columns:1fr 80px;gap:8px;align-items:center;margin:7px 0"><span>${t[0]} — ${t[1]}</span><input type="number" min="0" value="${room.wins[t[0]]||0}" onchange="setWins('${t[0]}',this.value)"></div>`).join("");
+}
+function setWins(id,v){room.wins[id]=Math.max(0,parseInt(v)||0);save();renderTeams();renderAll()}
+function showTab(id){document.querySelectorAll(".tab").forEach(x=>x.style.display="none");document.getElementById(id).style.display="block";document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));let b=document.getElementById("n-"+id);if(b)b.classList.add("active")}
+function logout(){state.user=null;state.room=null;save();location.reload()}
+</script>
+</body></html>
